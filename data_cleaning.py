@@ -44,6 +44,7 @@ def download_quotes(ticker):
 
 if __name__ == '__main__':
     try:
+        # argv[1] = AAPL
         download_quotes(sys.argv[1])
         print("%s Download Complete" % sys.argv[1])
     except:
