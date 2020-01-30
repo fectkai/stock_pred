@@ -11,6 +11,7 @@ def find_crumb_store(lines):
             return l
     print("Did not find CrumbStore")
 
+# https://finance.yahoo.com/quote/AAPL/?p=AAPL
 def get_page_data(ticker):
     url = "https://finance.yahoo.com/quote/%s/?p=%s" % (ticker, ticker)
     r = requests.get(url)
