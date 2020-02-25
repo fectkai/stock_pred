@@ -2,11 +2,14 @@ import numpy as np
 import torch
 from torch import nn
 from torch import optim
+from torch.backends import cudnn
 
 from nets import SimpleLSTM, SimpleGRU
 from data_loading import Loader
 import utils
 import visdom
+from option import opt
+
 
 class TrainSet:
 
@@ -23,13 +26,21 @@ class TrainSet:
         train_size = int(self.prices.train_size * split_rate)
         X = torch.unsqueeze(torch.from_numpy(self.prices.X[:train_size, :]).float(), 1)
         X_train, Y_train = utils.data_process(X, train_size, seq_length)
+        X_train = X_train.to(opt.device)
+        Y_train = Y_train.to(opt.device)
 
         if model_name == 'LSTM':
             model = SimpleLSTM(self.window_size, hidden_size, num_layers = num_layers)
         else:
             model = SimpleGRU(self.window_size, hidden_size, num_layers = num_layers)
 
-        loss_fn = nn.MSELoss()
+        model = model.to(opt.device)
+
+        if opt.device=='cuda':
+            model=torch.nn.DataParallel(model)
+            cudnn.benchmark=True
+        
+        loss_fn = nn.MSELoss().to(opt.device)
         optimizer = optim.Adam(model.parameters())
         loss_plt = []
 
