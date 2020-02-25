@@ -12,7 +12,7 @@ class TrainSet:
 
     def __init__(self, filename, window_size = 3, LogReturn = True):
 
-        self.prices      = Loader(filename, window_size, LogReturn = LogReturn)
+        self.prices = Loader(filename, window_size, LogReturn = LogReturn)
         self.window_size = window_size
 
     def __call__(self, model_name, hidden_size = 128, seq_length = 30, 

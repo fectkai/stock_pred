@@ -5,7 +5,7 @@ class Loader:
 
     def __init__(self, filename, window_size, LogReturn = True):
 
-        adjusted_close = np.genfromtxt(filename, delimiter = ',', skip_header = 1, usecols = (5))
+        adjusted_close = np.genfromtxt('data/'+filename, delimiter = ',', skip_header = 1, usecols = (5))
 
         if (LogReturn):
             log_return = utils.logret(adjusted_close) 
