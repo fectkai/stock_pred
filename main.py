@@ -1,16 +1,17 @@
 import sys
 from train import TrainSet
 from evaluate import EvalSet
+from option import opt
 
-ticker = sys.argv[2] + '.csv'
+ticker = opt.dataset + '.csv'
 
 # python3 data_cleaning.py AAPL
 # python3 main.py train AAPL LSTM
 # python3 main.py test AAPL LSTM
 
-if sys.argv[1] == 'train':
+if opt.mode == 'train':
     Trainer = TrainSet(ticker, LogReturn = True)
-    Trainer(sys.argv[3])
+    Trainer(opt.model)
 else:
     Evaluator = EvalSet(ticker, LogReturn = True)
-    Evaluator(sys.argv[3])
+    Evaluator(opt.model)
