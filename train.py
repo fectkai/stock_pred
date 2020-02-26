@@ -9,6 +9,7 @@ from data_loading import Loader
 import utils
 import visdom
 from option import opt
+import time
 
 
 class TrainSet:
@@ -44,6 +45,8 @@ class TrainSet:
         optimizer = optim.Adam(model.parameters())
         loss_plt = []
 
+        timeStart = time.time()
+
         for epoch in range(num_epochs):
             loss_sum = 0
             for i in range(0, X_train.shape[1] - batch_size, batch_size):
@@ -69,6 +72,7 @@ class TrainSet:
 
             print('epoch [%d] finished, Loss Sum: %f' % (epoch, loss_sum))
             loss_plt.append(loss_sum)
-        
+        timeSpent = time.time() - timeStart
+        print('Time Spend : {}'.format(timeSpent))
         torch.save(model, model_name + '.model')
         # utils.plot([len(loss_plt)], [np.array(loss_plt)], 'black', 'Epoch', 'Loss Sum', 'MSE Loss Function')

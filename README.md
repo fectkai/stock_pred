@@ -8,6 +8,12 @@ cd data
 python3 data_cleaning.py AAPL
 ```
 
+- Implement visdom (localhost:8097)
+```
+python -m visdom.server
+```
+
+
 - To train Apple's price by an LSTM model and save the model
 ```
 python3 main.py --mode train --dataset AAPL --model LSTM
