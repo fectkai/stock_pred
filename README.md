@@ -14,6 +14,9 @@ https://finance.yahoo.com/quote/AAPL?p=AAPL
 - pytorch 1.3.1
 - python 3.6.x
 
+### **docker hub**  
+https://hub.docker.com/repository/docker/nuggy875/pytorch13
+
 <hr/>
 
 ## Implement

@@ -6,9 +6,9 @@ from data_loading import Loader
 import utils
 
 class EvalSet:
-
-    def __init__(self, filename, window_size = 3, LogReturn = True):
-
+    def __init__(self, dataset, window_size = 3, LogReturn = True):
+        self.dataset = dataset
+        self.filename = dataset + '.csv'
         self.prices = Loader(filename, window_size, LogReturn = LogReturn)
 
     def __call__(self, modelname, split_rate = .9, seq_length = 30, 
@@ -18,7 +18,7 @@ class EvalSet:
         X = self.prices.X[ train_size : train_size + 300, :]
         X = torch.unsqueeze(torch.from_numpy(X).float(), 1)
         X_test, Y_test = utils.data_process(X, X.shape[0], seq_length)
-        model = torch.load(modelname + '.model')
+        model = torch.load(modelname + '_' + self.dataset + '.model')
         model.eval()
         loss_fn = nn.MSELoss()
         with torch.no_grad():
