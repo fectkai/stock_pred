@@ -56,6 +56,8 @@ class TrainSet:
 
         timeStart = time.time()
 
+        print(X_train.shape[1])
+
         for epoch in range(opt.num_epochs):
             loss_sum = 0
             for i in range(0, X_train.shape[1] - batch_size, batch_size):
