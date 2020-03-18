@@ -20,6 +20,8 @@ def data_process(X, train_size, num_steps):
     return X_result, Y_result
 
 def plot(axislengths, prices, colors, xLabels, yLabels, Title, Legends):
+
+
     plt.figure()
     for i in range(0, len(axislengths)):
         length = axislengths[i]
@@ -31,3 +33,32 @@ def plot(axislengths, prices, colors, xLabels, yLabels, Title, Legends):
     plt.ylabel(yLabels)
     plt.title(Title)
     plt.show()
+
+def visdom_graph(vis, axislengths, prices, colors, xLabels, yLabels, Title, Legends):
+    # 0: prediction , 1: groundTruth 
+    
+    list_total = []
+    list_pp = []
+    accum_pp = 0
+    for pp in prices[0]:
+        accum_pp += pp
+        list_pp.append(accum_pp*250)
+
+    list_pg = []
+    accum_pg = 0
+    for pg in prices[1]:
+        accum_pg += pg
+        list_pg.append(accum_pg*250)
+
+    tensor_final = torch.cat((torch.unsqueeze(torch.FloatTensor(list_pp), 0), 
+                            torch.unsqueeze(torch.FloatTensor(list_pg), 0)), 0).transpose(0,1)
+
+    price_t = torch.FloatTensor(prices).transpose(0,1)
+    vis.line(X=torch.Tensor(list(range(len(prices[0])))),
+            Y=tensor_final,
+            opts=dict(title=Title,
+                    xlabel=xLabels,
+                    ylabel=yLabels,
+                    legend=Legends,
+                    showlegend=True)
+                    )
