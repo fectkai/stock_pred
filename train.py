@@ -89,4 +89,4 @@ class TrainSet:
         print('Time Spend : {}'.format(timeSpent))
         torch.save(model, 'trained_model/'+model_name + '_'+ self.dataset + '.model')
         # utils.plot([len(loss_plt)], [np.array(loss_plt)], 'black', 'Epoch', 'Loss Sum', 'MSE Loss Function')
-        utils.visdom_graph(vis, [len(loss_plt)], [np.array(loss_plt)], 'black', 'Epoch', 'Loss Sum', 'MSE Loss Function')
+        # utils.visdom_graph(vis, [len(loss_plt)], [np.array(loss_plt)], 'black', 'Epoch', 'Loss Sum', 'MSE Loss Function')
