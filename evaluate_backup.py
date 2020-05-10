@@ -29,14 +29,10 @@ class EvalSet:
         loss_fn = nn.MSELoss().to(opt.device)
         with torch.no_grad():
             loss_sum = 0
-            Y_pred = model(X_test[:, :batch_size, :])       # [2, b, 3]
-            if batch_size==1:   
-                Y_pred = torch.unsqueeze(Y_pred, 1)
-            Y_pred = torch.squeeze(Y_pred[num_layers - 1, :, :])    # [b, 3]
+            Y_pred = model(X_test[:, :batch_size, :])
+            Y_pred = torch.squeeze(Y_pred[num_layers - 1, :, :])
             for i in range(batch_size, X_test.shape[1], batch_size):
                 y = model(X_test[:, i : i + batch_size, :])
-                if batch_size==1:   
-                    y = torch.unsqueeze(y, 1)
                 y = torch.squeeze(y[num_layers - 1, :, :])
                 Y_pred = torch.cat((Y_pred, y))
 
@@ -46,7 +42,7 @@ class EvalSet:
         print(loss_sum)
         Y_pred.resize_(Y_pred.shape[0] * Y_pred.shape[1])
         Y_test.resize_(Y_test.shape[0] * Y_test.shape[1])
-        Y_final = torch.cat([torch.unsqueeze(Y_pred,1), torch.unsqueeze(Y_test,1)], dim=1)
+
         # axislengths, prices, colors, xLabels, yLabels, Title, Legends
         if opt.debug_mode:
             utils.plot(
@@ -58,16 +54,6 @@ class EvalSet:
                 'Sample ' + modelname + ' Price Result',
                 ['Prediction', 'Ground Truth'])
         else:
-            
-            vis.line(X= torch.Tensor(list(range(len(Y_pred)))),
-                    Y=Y_final,
-                    opts=dict(title=opt.dataset + ' dataset ' + opt.model + ' Price Result',
-                            xlabel='Time (Days)',
-                            ylabel='Price',
-                            legend=['Prediction', 'Ground Truth'],
-                            showlegend=True)
-                    )
-            '''
             utils.visdom_graph(vis,
                 [Y_pred.shape[0], Y_test.shape[0]], 
                 [Y_pred.cpu().numpy(), Y_test.cpu().numpy()], 
@@ -76,8 +62,6 @@ class EvalSet:
                 'Price',
                 opt.dataset + ' dataset ' + opt.model + ' Price Result',
                 ['Prediction', 'Ground Truth'])
-            '''
-            
 
 
 if __name__=="__main__":

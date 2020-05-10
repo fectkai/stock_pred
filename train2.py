@@ -21,7 +21,7 @@ stock_name_ = {
 
 
 class TrainSet:
-    def __init__(self, dataset, window_size = 3, LogReturn = 'log'):
+    def __init__(self, dataset, window_size = 3, LogReturn = True):
         self.dataset = dataset
         self.filename = dataset + '.csv'
         self.prices = Loader(self.filename, window_size, LogReturn = LogReturn)
@@ -94,5 +94,5 @@ class TrainSet:
 
 
 if __name__ == "__main__":
-    Trainer = TrainSet(opt.dataset, LogReturn = opt.type)
+    Trainer = TrainSet(opt.dataset, LogReturn = True)
     Trainer(opt.model)
