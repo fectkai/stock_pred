@@ -43,7 +43,7 @@ def data_process_bin(X, train_size, num_steps):
         y_result = X[s + num_steps, :, :]
         X_last = torch.cat((X_last, x_last), dim = 0)
         Y_result = torch.cat((Y_result, X[s + num_steps, :, :]), dim = 0)
-        diff_result.append(binary_result(x_last-y_result))
+        diff_result.append(binary_result(y_result-x_last))
     Diff_result = torch.FloatTensor(diff_result)
     return X_result, Y_result, Diff_result
 

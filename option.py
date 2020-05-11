@@ -9,7 +9,6 @@ parser.add_argument('--model', type=str, default='LSTM')
 parser.add_argument('--bs', dest='batch_size', help='batch size', default=8, type=int)
 parser.add_argument('--epoch', dest='num_epochs', default=2000, type=int)
 parser.add_argument('--debug_mode', dest='debug_mode', action='store_true')
-parser.add_argument('--ws', dest='window_size', type=int, default=3)
 parser.set_defaults(debug_mode=False)
 
 parser.add_argument('--test', dest='test', action='store_true')

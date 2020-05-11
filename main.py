@@ -8,19 +8,19 @@ from option import opt
 if opt.binary:
     if not opt.test:
         print('Train Mode : Binary Classificaion')
-        Trainer = TrainSet(dataset = opt.dataset, window_size= 1, LogReturn = opt.type)
-        Trainer(opt.model)
+        TrainerBin = TrainSetBinary(dataset = opt.dataset, window_size= 1, LogReturn = opt.type)
+        TrainerBin(opt.model)
     else:
         print('Test Mode : Binary Classificaion')
-        Evaluator = EvalSet(dataset = opt.dataset, window_size= 1, LogReturn = opt.type)
-        Evaluator(opt.model)
+        EvaluatorBin = EvalSetBinary(dataset = opt.dataset, window_size= 1, LogReturn = opt.type)
+        EvaluatorBin(opt.model)
 else:
     if not opt.test:
         print('Train Mode : Regression')
-        Trainer = TrainSet(dataset = opt.dataset, window_size= 3, LogReturn = opt.type)
-        Trainer(opt.model)
+        TrainerReg = TrainSet(dataset = opt.dataset, window_size= 3, LogReturn = opt.type)
+        TrainerReg(opt.model)
     else:
         print('Test Mode : Regression')
-        Evaluator = EvalSet(dataset = opt.dataset, window_size= 3, LogReturn = opt.type)
-        Evaluator(opt.model)
+        EvaluatorReg = EvalSet(dataset = opt.dataset, window_size= 3, LogReturn = opt.type)
+        EvaluatorReg(opt.model)
 

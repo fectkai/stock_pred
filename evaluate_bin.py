@@ -21,7 +21,7 @@ class EvalSetBinary:
         X = torch.unsqueeze(torch.from_numpy(X).float(), 1)
         X_test, Y_test, diff_test = utils.data_process_bin(X, X.shape[0], seq_length)
         X_test = X_test.to(opt.device)
-        Y_test = Y_test.to(opt.device)
+        # Y_test = Y_test.to(opt.device)
         diff_test = diff_test.to(opt.device)
 
         model = torch.load('trained_model/'+modelname + '_' + self.dataset + '_bin.model')
@@ -44,21 +44,16 @@ class EvalSetBinary:
                 loss = loss_fn(y, diff_test[i : i + batch_size])
                 loss_sum += loss.item()
 
-        print(loss_sum)
-        ### ====================================================================
-        Y_pred.resize_(Y_pred.shape[0] * Y_pred.shape[1])
-        diff_test.resize_(diff_test.shape[0] * diff_test.shape[1])
-        Y_final = torch.cat([torch.unsqueeze(Y_pred,1), torch.unsqueeze(diff_test,1)], dim=1)
-            
-        vis.line(X= torch.Tensor(list(range(len(Y_pred)))),
-                Y=Y_final,
-                opts=dict(title=opt.dataset + ' dataset ' + opt.model + ' ' + opt.type + ' Result',
-                        xlabel='Time (Days)',
-                        ylabel=opt.type,
-                        legend=['Prediction', 'Ground Truth'],
-                        showlegend=True)
-                )
-            
+        # print(loss_sum)
+        count = 0
+        for i in range(diff_test.shape[0]):
+            if diff_test.data[i] == 0:
+                if Y_pred.data[i] < 0.5:
+                    count = count+1
+            else:
+                if Y_pred.data[i] >= 0.5:
+                    count = count+1
+        print('{}%'.format((count / diff_test.shape[0])*100))
 
 
 if __name__=="__main__":
