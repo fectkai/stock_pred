@@ -21,7 +21,7 @@ stock_name_ = {
 
 
 class TrainSet:
-    def __init__(self, dataset, window_size = 3, LogReturn = 'log'):
+    def __init__(self, dataset, window_size = 3, LogReturn = 'price'):
         self.dataset = dataset
         self.filename = dataset + '.csv'
         self.prices = Loader(self.filename, window_size, LogReturn = LogReturn)
@@ -56,8 +56,6 @@ class TrainSet:
 
         timeStart = time.time()
 
-        print(X_train.shape[1])
-
         for epoch in range(opt.num_epochs):
             loss_sum = 0
             Y_pred = model(X_train[:, :batch_size, :])
@@ -91,7 +89,7 @@ class TrainSet:
             
             print('epoch [%d] finished, Loss Sum: %f' % (epoch, loss_sum))
             loss_plt.append(loss_sum)
-            if epoch % 10 == 0:
+            if epoch % 30 == 0:
                 print('testing')
                 with torch.no_grad():
                     a = Y_pred

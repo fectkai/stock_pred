@@ -4,7 +4,7 @@ from torch import nn
 from torch import optim
 from torch.backends import cudnn
 
-from nets import SimpleLSTM, SimpleGRU
+from nets import SimpleLSTM, BinaryLSTM
 from data_loading import Loader
 import utils
 import visdom
@@ -19,9 +19,8 @@ stock_name_ = {
     'KOSPI':'KOSPI200'
 }
 
-
-class TrainSet:
-    def __init__(self, dataset, window_size = 3, LogReturn = 'log'):
+class TrainSetBinary:
+    def __init__(self, dataset, window_size = 1, LogReturn = 'price'):
         self.dataset = dataset
         self.filename = dataset + '.csv'
         self.prices = Loader(self.filename, window_size, LogReturn = LogReturn)
@@ -35,35 +34,40 @@ class TrainSet:
 
         train_size = int(self.prices.train_size * split_rate)
         X = torch.unsqueeze(torch.from_numpy(self.prices.X[:train_size, :]).float(), 1)
-        X_train, Y_train = utils.data_process(X, train_size, seq_length)
+        X_train, Y_train, diff_train = utils.data_process_bin(X, train_size, seq_length)
         X_train = X_train.to(opt.device)
         Y_train = Y_train.to(opt.device)
+        diff_train = diff_train.to(opt.device)
 
-        if model_name == 'LSTM':
-            model = SimpleLSTM(self.window_size, hidden_size, num_layers = num_layers)
-        else:
-            model = SimpleGRU(self.window_size, hidden_size, num_layers = num_layers)
-
+        model = BinaryLSTM(self.window_size, hidden_size, num_layers = num_layers)
         model = model.to(opt.device)
-
         if opt.device=='cuda':
             model=torch.nn.DataParallel(model)
             cudnn.benchmark=True
         
-        loss_fn = nn.MSELoss().to(opt.device)
+        loss_fn = nn.BCELoss().to(opt.device)
         optimizer = optim.Adam(model.parameters())
         loss_plt = []
 
         timeStart = time.time()
 
-        print(X_train.shape[1])
-
         for epoch in range(opt.num_epochs):
             loss_sum = 0
-            for i in range(0, X_train.shape[1] - batch_size, batch_size):
-                Y_pred = model(X_train[:, i : i + batch_size, :])
-                Y_pred = torch.squeeze(Y_pred[num_layers - 1, :, :])
-                loss = loss_fn(Y_train[i : i + batch_size, :], Y_pred)
+            Y_pred = model(X_train[:, :batch_size, :])
+            if batch_size==1:
+                Y_pred = torch.unsqueeze(Y_pred, 1)
+            if self.window_size == 1:
+                Y_pred = torch.unsqueeze(Y_pred, 2)
+            Y_pred = torch.squeeze(Y_pred[num_layers-1, :, :])
+            for i in range(batch_size, X_train.shape[1], batch_size):
+                y = model(X_train[:, i : i + batch_size, :])
+                if batch_size==1:
+                    y = torch.squeeze(y, 1)
+                if self.window_size==1:
+                    y = torch.unsqueeze(y, 2)
+                y = torch.squeeze(y[num_layers - 1, :, :])
+                Y_pred = torch.cat((Y_pred, y))
+                loss = loss_fn(y, diff_train[i : i + batch_size])
                 loss_sum += loss.item()
 
                 optimizer.zero_grad()
@@ -84,15 +88,33 @@ class TrainSet:
             
             print('epoch [%d] finished, Loss Sum: %f' % (epoch, loss_sum))
             loss_plt.append(loss_sum)
-
+            '''
+            if epoch % 30 == 0:
+                print('testing')
+                with torch.no_grad():
+                    a = Y_pred
+                    b = Y_train
+                    a = a.contiguous().view(7004)
+                    b = b.contiguous().view(7004)
+                    Y_final = torch.cat([torch.unsqueeze(a,1), torch.unsqueeze(b,1)], dim=1)
+                    vis.line(X= torch.Tensor(list(range(len(a)))),
+                            Y=Y_final,
+                            win='testing',
+                            opts=dict(title=opt.dataset + ' dataset ' + opt.model + ' ' + opt.type + 'Result',
+                                    xlabel='Time (Days)',
+                                    ylabel=opt.type,
+                                    legend=['Prediction', 'Ground Truth'],
+                                    showlegend=True)
+                            )
+            '''
         timeSpent = time.time() - timeStart
         print('Time Spend : {}'.format(timeSpent))
-        torch.save(model, 'trained_model/'+model_name + '_'+ self.dataset + '.model')
+        torch.save(model, 'trained_model/'+model_name + '_'+ self.dataset + '_bin.model')
         # utils.plot([len(loss_plt)], [np.array(loss_plt)], 'black', 'Epoch', 'Loss Sum', 'MSE Loss Function')
         # utils.visdom_graph(vis, [len(loss_plt)], [np.array(loss_plt)], 'black', 'Epoch', 'Loss Sum', 'MSE Loss Function')
 
 
 
 if __name__ == "__main__":
-    Trainer = TrainSet(opt.dataset, LogReturn = opt.type)
+    Trainer = TrainSetBinary(opt.dataset, window_size=1, LogReturn = opt.type)
     Trainer(opt.model)
