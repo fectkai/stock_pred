@@ -61,9 +61,9 @@ class EvalSet:
             
             vis.line(X= torch.Tensor(list(range(len(Y_pred)))),
                     Y=Y_final,
-                    opts=dict(title=opt.dataset + ' dataset ' + opt.model + ' Price Result',
+                    opts=dict(title=opt.dataset + ' dataset ' + opt.model + ' ' + opt.type + ' Result',
                             xlabel='Time (Days)',
-                            ylabel='Price',
+                            ylabel=opt.type,
                             legend=['Prediction', 'Ground Truth'],
                             showlegend=True)
                     )

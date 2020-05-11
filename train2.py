@@ -21,7 +21,7 @@ stock_name_ = {
 
 
 class TrainSet:
-    def __init__(self, dataset, window_size = 3, LogReturn = True):
+    def __init__(self, dataset, window_size = 3, LogReturn = 'log'):
         self.dataset = dataset
         self.filename = dataset + '.csv'
         self.prices = Loader(self.filename, window_size, LogReturn = LogReturn)
@@ -81,7 +81,7 @@ class TrainSet:
                            title='Training Loss {} (bs={})'.format(stock_name_[self.dataset], batch_size),
                            legend=['Loss'])
                  )
-
+            
             print('epoch [%d] finished, Loss Sum: %f' % (epoch, loss_sum))
             loss_plt.append(loss_sum)
 
@@ -94,5 +94,5 @@ class TrainSet:
 
 
 if __name__ == "__main__":
-    Trainer = TrainSet(opt.dataset, LogReturn = True)
+    Trainer = TrainSet(opt.dataset, LogReturn = opt.type)
     Trainer(opt.model)

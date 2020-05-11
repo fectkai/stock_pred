@@ -60,10 +60,17 @@ class TrainSet:
 
         for epoch in range(opt.num_epochs):
             loss_sum = 0
-            for i in range(0, X_train.shape[1] - batch_size, batch_size):
-                Y_pred = model(X_train[:, i : i + batch_size, :])
-                Y_pred = torch.squeeze(Y_pred[num_layers - 1, :, :])
-                loss = loss_fn(Y_train[i : i + batch_size, :], Y_pred)
+            Y_pred = model(X_train[:, :batch_size, :])
+            if batch_size==1:
+                Y_pred = torch.unsqueeze(Y_pred, 1)
+            Y_pred = torch.squeeze(Y_pred[num_layers-1, :, :])
+            for i in range(batch_size, X_train.shape[1], batch_size):
+                y = model(X_train[:, i : i + batch_size, :])
+                if batch_size==1:
+                    y = torch.squeeze(y, 1)
+                y = torch.squeeze(y[num_layers - 1, :, :])
+                Y_pred = torch.cat((Y_pred, y))
+                loss = loss_fn(Y_train[i : i + batch_size, :], y)
                 loss_sum += loss.item()
 
                 optimizer.zero_grad()
@@ -81,9 +88,26 @@ class TrainSet:
                            title='Training Loss {} (bs={})'.format(stock_name_[self.dataset], batch_size),
                            legend=['Loss'])
                  )
-
+            
             print('epoch [%d] finished, Loss Sum: %f' % (epoch, loss_sum))
             loss_plt.append(loss_sum)
+            if epoch % 10 == 0:
+                print('testing')
+                with torch.no_grad():
+                    a = Y_pred
+                    b = Y_train
+                    a = a.contiguous().view(2314*3)
+                    b = b.contiguous().view(2314*3)
+                    Y_final = torch.cat([torch.unsqueeze(a,1), torch.unsqueeze(b,1)], dim=1)
+                    vis.line(X= torch.Tensor(list(range(len(a)))),
+                            Y=Y_final,
+                            win='testing',
+                            opts=dict(title=opt.dataset + ' dataset ' + opt.model + ' ' + opt.type + 'Result',
+                                    xlabel='Time (Days)',
+                                    ylabel=opt.type,
+                                    legend=['Prediction', 'Ground Truth'],
+                                    showlegend=True)
+                            )
 
         timeSpent = time.time() - timeStart
         print('Time Spend : {}'.format(timeSpent))
