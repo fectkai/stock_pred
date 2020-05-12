@@ -79,7 +79,7 @@ class TrainSet:
             # Visdom
             vis.line(X=torch.ones((1, 1)).cpu() * i + epoch * train_size,
                     Y=torch.Tensor([loss_sum]).unsqueeze(0).cpu(),
-                    win='loss',
+                    win='reg_loss',
                     update='append',
                     opts=dict(xlabel='step',
                            ylabel='Loss',
@@ -100,7 +100,7 @@ class TrainSet:
                     vis.line(X= torch.Tensor(list(range(len(a)))),
                             Y=Y_final,
                             win='testing',
-                            opts=dict(title=opt.dataset + ' dataset ' + opt.model + ' ' + opt.type + 'Result',
+                            opts=dict(title=opt.dataset + ' dataset ' + opt.model + ' ' + opt.type + ' Result (Regression)',
                                     xlabel='Time (Days)',
                                     ylabel=opt.type,
                                     legend=['Prediction', 'Ground Truth'],
