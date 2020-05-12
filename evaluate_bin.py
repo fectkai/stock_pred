@@ -24,7 +24,7 @@ class EvalSetBinary:
         # Y_test = Y_test.to(opt.device)
         diff_test = diff_test.to(opt.device)
 
-        model = torch.load('trained_model/'+modelname + '_' + self.dataset + '_bin.model')
+        model = torch.load('trained_model/'+modelname + '_' + self.dataset + '_bin_' + opt.type + '.model')
         model.eval()
         model = model.to(opt.device)
 

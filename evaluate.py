@@ -22,7 +22,7 @@ class EvalSet:
         X_test, Y_test = utils.data_process(X, X.shape[0], seq_length)
         X_test = X_test.to(opt.device)
         Y_test = Y_test.to(opt.device)
-        model = torch.load('trained_model/'+modelname + '_' + self.dataset + '.model')
+        model = torch.load('trained_model/'+modelname + '_' + self.dataset + '_reg_' + opt.type + '.model')
         model.eval()
         model = model.to(opt.device)
 

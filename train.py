@@ -84,12 +84,13 @@ class TrainSet:
                     opts=dict(xlabel='step',
                            ylabel='Loss',
                            title='Training Loss {} (bs={})'.format(stock_name_[self.dataset], batch_size),
-                           legend=['Loss'])
-                 )
+                           legend=['Loss']
+                    )
+                )
             
             print('epoch [%d] finished, Loss Sum: %f' % (epoch, loss_sum))
             loss_plt.append(loss_sum)
-            if epoch % 30 == 0:
+            if epoch % 100 == 0:
                 print('testing')
                 with torch.no_grad():
                     a = Y_pred
@@ -109,7 +110,7 @@ class TrainSet:
 
         timeSpent = time.time() - timeStart
         print('Time Spend : {}'.format(timeSpent))
-        torch.save(model, 'trained_model/'+model_name + '_'+ self.dataset + '.model')
+        torch.save(model, 'trained_model/'+model_name + '_'+ self.dataset + '_reg_'+opt.type+'.model')
         # utils.plot([len(loss_plt)], [np.array(loss_plt)], 'black', 'Epoch', 'Loss Sum', 'MSE Loss Function')
         # utils.visdom_graph(vis, [len(loss_plt)], [np.array(loss_plt)], 'black', 'Epoch', 'Loss Sum', 'MSE Loss Function')
 

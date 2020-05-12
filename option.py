@@ -7,7 +7,7 @@ parser.add_argument('--data_path', type=str, default='data/')
 parser.add_argument('--dataset', type=str, default='KOSPI')
 parser.add_argument('--model', type=str, default='LSTM')
 parser.add_argument('--bs', dest='batch_size', help='batch size', default=8, type=int)
-parser.add_argument('--epoch', dest='num_epochs', default=2000, type=int)
+parser.add_argument('--epoch', dest='num_epochs', default=10000, type=int)
 parser.add_argument('--debug_mode', dest='debug_mode', action='store_true')
 parser.set_defaults(debug_mode=False)
 
