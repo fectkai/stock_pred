@@ -8,7 +8,7 @@ from option import opt
 import visdom
 
 class EvalSet:
-    def __init__(self, dataset, window_size = 3, LogReturn = 'log'):
+    def __init__(self, dataset, window_size = 3, LogReturn = 'log'):  #window_size =1 JSW 수정
         self.dataset = dataset
         self.filename = dataset + '.csv'
         self.prices = Loader(self.filename, window_size, LogReturn = LogReturn)
@@ -17,7 +17,8 @@ class EvalSet:
                                                 batch_size = 8, num_layers = 2):
         vis = visdom.Visdom()
         train_size = int(self.prices.train_size * split_rate)
-        X = self.prices.X[ train_size : train_size + 300, :]
+        period_end_size = self.prices.train_size                 #kfiri 추가
+        X = self.prices.X[ train_size : period_end_size, :]      #kfiri 수정
         X = torch.unsqueeze(torch.from_numpy(X).float(), 1)
         X_test, Y_test = utils.data_process(X, X.shape[0], seq_length)
         X_test = X_test.to(opt.device)
@@ -78,7 +79,7 @@ class EvalSet:
                 opt.dataset + ' dataset ' + opt.model + ' Price Result',
                 ['Prediction', 'Ground Truth'])
             '''
-            
+            print(len(Y_pred))      #kfiri 추가
 
 
 if __name__=="__main__":

@@ -9,7 +9,6 @@ class Loader:
             adjusted_close = np.genfromtxt('data/'+filename, delimiter = ',', skip_header = 1, usecols = (4))
         else:
             adjusted_close = np.genfromtxt('data/'+filename, delimiter = ',', skip_header = 1, usecols = (5))
-
         if LogReturn == 'log':
             log_return = utils.logret(adjusted_close) 
         elif LogReturn == 'price':

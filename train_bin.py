@@ -20,7 +20,7 @@ stock_name_ = {
 }
 
 class TrainSetBinary:
-    def __init__(self, dataset, window_size = 1, LogReturn = 'price'):
+    def __init__(self, dataset, window_size = 1, LogReturn = 'log'):
         self.dataset = dataset
         self.filename = dataset + '.csv'
         self.prices = Loader(self.filename, window_size, LogReturn = LogReturn)
@@ -31,13 +31,12 @@ class TrainSetBinary:
         
         vis = visdom.Visdom()
         batch_size = opt.batch_size
-
         train_size = int(self.prices.train_size * split_rate)
         X = torch.unsqueeze(torch.from_numpy(self.prices.X[:train_size, :]).float(), 1)
-        X_train, Y_train, diff_train = utils.data_process_bin(X, train_size, seq_length)
+        X_train, Y_target = utils.data_process_bin(X, train_size, seq_length)  #kfiri 수정 // 이전 X_train, Y_train, diff_train = utils.data_process_bin(X, train_size, seq_length)
         X_train = X_train.to(opt.device)
-        Y_train = Y_train.to(opt.device)
-        diff_train = diff_train.to(opt.device)
+        #Y_train = Y_train.to(opt.device)                               #kfiri 수정 // 이전 Y_train = Y_train.to(opt.device)
+        Y_target = Y_target.to(opt.device)                              #kfiri 수정 // 이전 diff_train = diff_train.to(opt.device)
 
         model = BinaryLSTM(self.window_size, hidden_size, num_layers = num_layers)
         model = model.to(opt.device)
@@ -59,6 +58,12 @@ class TrainSetBinary:
             if self.window_size == 1:
                 Y_pred = torch.unsqueeze(Y_pred, 2)
             Y_pred = torch.squeeze(Y_pred[num_layers-1, :, :])
+            loss = loss_fn(Y_pred, Y_target[:batch_size])
+            loss_sum += loss.item()
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
             for i in range(batch_size, X_train.shape[1], batch_size):
                 y = model(X_train[:, i : i + batch_size, :])
                 if batch_size==1:
@@ -67,24 +72,24 @@ class TrainSetBinary:
                     y = torch.unsqueeze(y, 2)
                 y = torch.squeeze(y[num_layers - 1, :, :])
                 Y_pred = torch.cat((Y_pred, y))
-                loss = loss_fn(y, diff_train[i : i + batch_size])
+                loss = loss_fn(y, Y_target[i : i + batch_size])          #kfiri 수정 // 이전 loss = loss_fn(y, diff_train[i : i + batch_size])
                 loss_sum += loss.item()
 
                 optimizer.zero_grad()
 
                 loss.backward()
                 optimizer.step()
-            
-            # Visdom
-            vis.line(X=torch.ones((1, 1)).cpu() * i + epoch * train_size,
-                    Y=torch.Tensor([loss_sum]).unsqueeze(0).cpu(),
-                    win='loss',
-                    update='append',
-                    opts=dict(xlabel='step',
-                           ylabel='Loss',
-                           title='Training Loss {} (bs={})'.format(stock_name_[self.dataset], batch_size),
-                           legend=['Loss'])
-                 )
+            if epoch%10==0:
+                # Visdom
+                vis.line(X=torch.ones((1, 1)).cpu() * i + epoch * train_size,
+                        Y=torch.Tensor([loss_sum]).unsqueeze(0).cpu(),
+                        win='loss',
+                        update='append',
+                        opts=dict(xlabel='step',
+                            ylabel='Loss',
+                            title='Training Loss {} (bs={})'.format(stock_name_[self.dataset], batch_size),
+                            legend=['Loss'])
+                    )
             
             print('epoch [%d] finished, Loss Sum: %f' % (epoch, loss_sum))
             loss_plt.append(loss_sum)
@@ -107,6 +112,14 @@ class TrainSetBinary:
                                     showlegend=True)
                             )
             '''
+        '''
+        print(y[0:10])
+        print(Y_target[0:10])
+        print(y[6990:])    
+        print(Y_target[6990:])
+        print(Y_target.shape)
+        print(y.shape)
+        '''
         timeSpent = time.time() - timeStart
         print('Time Spend : {}'.format(timeSpent))
         torch.save(model, 'trained_model/'+model_name + '_'+ self.dataset + '_bin_' + opt.type + '.model')
